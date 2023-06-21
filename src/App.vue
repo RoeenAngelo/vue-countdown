@@ -1,8 +1,10 @@
 <script setup>
+import { computed, reactive, ref } from 'vue';
 import { RouterLink, RouterView } from 'vue-router'
 import Event from './components/Event.vue';
+import AddUpdateForm from './components/AddUpdateForm.vue';
 
-const eventData = [
+const eventData = reactive([
   {
     id: 1,
     name: "Graduation",
@@ -38,14 +40,18 @@ const eventData = [
     date: "2023-06-19",
     background: "#EB9A0F",
   },
-  {
+  { 
     id: 6,
     name: "Conference Talk",
     details: "dont flop",
     date: "2026-02-28",
     background: "#68EE94",
   },
-];
+]);
+
+
+const showPastEvents = ref(false)
+let showForm = ref(false)
 
 function daysLeft(event) {
       const time = Date.parse(event.date) - Date.now();
@@ -53,17 +59,41 @@ function daysLeft(event) {
       return days;
     }
 
+const orderEvents = computed(() => {
+  const eventsToOrder = eventData
+  return eventsToOrder.sort((a,b) => a.date > b.date ? 1 : -1)
+})
+
+function addNewEvent(event) {
+  event.id = eventData.length + 1
+  eventData.push(event)
+}
+
+
 </script>
 
 <template>
+  <teleport to="#modal">
+    <AddUpdateForm 
+    @close-form="showForm = false"
+    @add-new-event="addNewEvent($event)"
+    v-if="showForm" 
+    />
+  </teleport>
+
+  <div class="options">
+    <button @click="showPastEvents = !showPastEvents">Show Past Events</button>
+    <button class="addNew" @click="showForm = !showForm">&#43;</button>
+  </div>
   <ul>
     <li
-    v-for="event in eventData" 
+    v-for="event in orderEvents" 
 		:key="event.id"
 		>
       <Event 
       :event="event"
       :daysLeft="daysLeft(event)"
+      :showPastEvents="showPastEvents"
       />
     </li>
   </ul>

@@ -8,7 +8,9 @@ const props = defineProps({
 	},
 	daysLeft: {
 		type: Number
-	}
+	},
+	showPastEvents: Boolean,
+
 }) 
 
 // Function
@@ -25,13 +27,21 @@ const daysLeftString = computed(() => {
 	return `${dayOrDays} ${leftOrAgo}`
 })
 
+const changeContrast = computed(() => {
+	const lowContrastBackgrounds = ['#f9f970', '#68EE94']
+	return lowContrastBackgrounds.includes(props.event.background)
+})
+
 </script>
 
 <template>
      <article 
-		 v-show=" Math.sign(daysLeft) !== -1 "
-		 :style="{ background: event.background }
-		 ">
+		 v-show=" Math.sign(daysLeft) !== -1 || showPastEvents "
+		 :style="{ 
+				backgroundColor : event.background,
+				color: changeContrast ? '#454444' : 'whitesmoke' 
+			}"
+		>
 				<div class="data">
 					<h3 class="name">{{ event.name }}!</h3>
 					<p class="details">{{ event.details }}</p>
