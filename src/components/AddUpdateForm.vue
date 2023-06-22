@@ -1,5 +1,5 @@
 <script setup>
-import { defineEmits, reactive } from 'vue';
+import { ref, reactive } from 'vue';
 
 
 const emit = defineEmits(['close-form', 'add-new-event'])
@@ -11,14 +11,42 @@ const newEvent = reactive({
 	// background: ''
 })
 
+function addEvent() {
+	emit('add-new-event', newEvent) 
+	emit('close-form')
+}
 
+// Data Validation
+
+const errors = ref([])
+
+function validate() {
+	if (!newEvent.name) errors.value.push('Name is required')
+	if (!newEvent.details) errors.value.push('Details is required')
+	if (!newEvent.date) errors.value.push('Date is required')
+	if (!newEvent.background) errors.value.push('Background is required')
+	
+	// Don't add event if there are errors
+	if (errors.value.length > 0) return
+
+	// Add event to newEvent array if there are no errors
+	addEvent()
+}
 
 
 </script>
 <template>
     <div class="form_wrapper">
       <form
-				@keyup.enter.prevent="emit('add-new-event', newEvent), $emit('close-form')">
+				@keyup.enter.prevent="validate()"
+				>
+				<div v-if="errors.length > 0">
+					<ul>
+						<li v-for="error in errors">
+							{{ error }}
+						</li>
+					</ul>
+				</div>
 				<span @click="emit('close-form')">&#10060</span>
         <div>
           <label for="name">Event:</label>
@@ -45,7 +73,7 @@ const newEvent = reactive({
           </select>
         </div>
         <div>
-          <button @click.prevent="emit('add-new-event', newEvent), $emit('close-form')">add</button>
+          <button @click.prevent="validate()">add</button>
         </div>
       </form>
     </div>
